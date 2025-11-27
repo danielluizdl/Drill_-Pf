@@ -3,16 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Poker GTO Builder - Dia 1</title>
+    <title>Poker Ranges Builder - Estrutura</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-    <div id="app">
-        <h1>Projeto GTO Builder Iniciado ♠️</h1>
-        <p>Estrutura de pastas configurada com sucesso.</p>
+<div id="app-container">
+    <header>
+        <h1>Ranges Builder Pro</h1>
+        <nav>
+            <button class="header-btn active" onclick="switchTab('home')">Meus Ranges</button>
+            <button class="header-btn" onclick="switchTab('editor')">Novo Range</button>
+            <button class="header-btn" onclick="switchTab('drill')">Treinar</button>
+        </nav>
+    </header>
+
+    <div id="tab-home" class="screen active">
+        <h2>Meus Ranges</h2>
+        <p>A lista de ranges salvos aparecerá aqui.</p>
     </div>
 
-    <script src="js/script.js"></script>
+    <div id="tab-editor" class="screen">
+        <h2>Editor de Range</h2>
+        <p>A matriz 13x13 será construída aqui.</p>
+        <button onclick="switchTab('table-editor')">Ir para Mesa (Teste)</button>
+    </div>
+
+    <div id="tab-table-editor" class="screen">
+        <h2>Configuração de Mesa</h2>
+        <p>A mesa oval verde ficará aqui.</p>
+        <button onclick="switchTab('editor')">Voltar</button>
+    </div>
+
+    <div id="tab-drill" class="screen">
+        <h2>Modo Treino</h2>
+        <p>O jogo interativo será aqui.</p>
+    </div>
+</div>
+
+<script src="js/script.js"></script>
 </body>
 </html>
