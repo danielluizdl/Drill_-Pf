@@ -1,0 +1,1 @@
+console.log("Sistema GTO Builder carregado com sucesso!");
