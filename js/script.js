@@ -23,3 +23,42 @@ function switchTab(tabId) {
         }
     }
 }
+
+// Dados das cartas
+const RANKS = ['A','K','Q','J','T','9','8','7','6','5','4','3','2'];
+
+// Inicia a matriz assim que o script carregar
+initHandMatrix();
+
+function initHandMatrix() {
+    const m = document.getElementById('hand-matrix');
+    if(!m) return; // Segurança
+    m.innerHTML = ''; 
+
+    // Loop Duplo para criar 13x13 = 169 células
+    for(let i=0; i<13; i++){
+        for(let j=0; j<13; j++){
+            // Lógica do Poker:
+            // Se i == j: Par (AA, KK)
+            // Se i < j:  Suited (AKs) - "s" de suited
+            // Se i > j:  Offsuit (KAo) - "o" de offsuit
+            let hand = '';
+            if(i === j) {
+                hand = RANKS[i] + RANKS[j]; 
+            } else if (i < j) {
+                hand = RANKS[i] + RANKS[j] + 's';
+            } else {
+                hand = RANKS[j] + RANKS[i] + 'o';
+            }
+            
+            // Criar o elemento HTML
+            let div = document.createElement('div');
+            div.className = 'cell';
+            div.innerText = hand;
+            
+            // Adicionar na tela
+            m.appendChild(div);
+        }
+    }
+    console.log("Matriz 13x13 gerada com sucesso.");
+}

@@ -25,9 +25,23 @@
     </div>
 
     <div id="tab-editor" class="screen">
-        <h2>Editor de Range</h2>
-        <p>A matriz 13x13 será construída aqui.</p>
-        <button onclick="switchTab('table-editor')">Ir para Mesa (Teste)</button>
+        <div class="editor-layout">
+            <div>
+                <h2>Novo Range</h2>
+                <div class="input-group">
+                    <label>Nome do Range</label>
+                    <input type="text" id="range-name" class="form-control" placeholder="Ex: Defesa BB vs UTG">
+                </div>
+                
+                <div id="hand-matrix"></div>
+            </div>
+            
+            <div class="strategy-panel">
+                <h3>Ações</h3>
+                <p style="color:#666; font-size:0.9rem; margin-bottom: 20px;">Controles de cor virão em breve...</p>
+                <button class="paint-btn" onclick="switchTab('table-editor')">Ir para Mesa ➔</button>
+            </div>
+        </div>
     </div>
 
     <div id="tab-table-editor" class="screen">

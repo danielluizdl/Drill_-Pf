@@ -46,3 +46,51 @@ h1 { margin: 0; font-size: 1.2rem; font-weight: 800; }
 .screen.active { display: block; }
 
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* Divide a tela em: Esquerda (Grid) e Direita (Painel) */
+.editor-layout { 
+    display: grid; 
+    grid-template-columns: 1fr 300px; 
+    gap: 30px; 
+    text-align: left; 
+    margin-top: 20px;
+}
+
+/* O Grid 13x13 */
+#hand-matrix { 
+    display: grid; 
+    grid-template-columns: repeat(13, 1fr); /* 13 colunas iguais */
+    gap: 2px; 
+    user-select: none; /* Impede seleção de texto */
+    max-width: 650px; 
+    margin: 0 auto; 
+}
+
+/* Cada quadradinho (Célula) */
+.cell { 
+    aspect-ratio: 1; /* Mantém sempre quadrado */
+    border-radius: 4px; 
+    background: #e5e7eb; 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    font-size: 0.7rem; 
+    font-weight: 700; 
+    color: #4b5563; 
+    cursor: pointer; 
+    border: 1px solid #d1d5db; 
+    transition: 0.1s;
+}
+.cell:hover { border-color: #999; background: #d1d5db; }
+
+/* Estilos auxiliares do Painel */
+.strategy-panel { background: #fff; padding: 20px; border-radius: 12px; border: 1px solid #e5e7eb; height: fit-content; }
+.input-group { margin-bottom: 15px; }
+.input-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 5px; }
+.form-control { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+.paint-btn { width: 100%; padding: 12px; background: #1f2937; color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; }
+
+/* Responsividade para celular */
+@media (max-width: 800px) {
+    .editor-layout { grid-template-columns: 1fr; }
+}
