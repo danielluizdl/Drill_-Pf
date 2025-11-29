@@ -37,12 +37,49 @@
             </div>
             
             <div class="strategy-panel">
-                <h3>Ações</h3>
-                <p style="color:#666; font-size:0.9rem; margin-bottom: 20px;">Controles de cor virão em breve...</p>
-                <button class="paint-btn" onclick="switchTab('table-editor')">Ir para Mesa ➔</button>
+                <h3>Ações & Frequências</h3>
+                
+                <div class="brush-builder">
+                    <div class="action-config">
+                        <div class="action-header">
+                            <div><span class="color-dot bg-fold"></span> Fold</div>
+                            <input type="text" id="pct-fold" class="pct-input" value="100" disabled>%
+                        </div>
+                    </div>
+
+                    <div class="action-config">
+                        <div class="action-header">
+                            <div><span class="color-dot bg-call"></span> Call</div>
+                            <input type="number" id="pct-call" class="pct-input" value="0" oninput="updateBrush('call', this.value)">%
+                        </div>
+                        <div class="slider-container">
+                            <input type="range" class="slider" min="0" max="100" value="0" oninput="updateBrush('call', this.value)">
+                        </div>
+                    </div>
+
+                    <div class="action-config">
+                        <div class="action-header">
+                            <div><span class="color-dot bg-raise"></span> Raise</div>
+                            <input type="number" id="pct-raise" class="pct-input" value="0" oninput="updateBrush('raise', this.value)">%
+                        </div>
+                        <div class="slider-container">
+                            <input type="range" class="slider" min="0" max="100" value="0" oninput="updateBrush('raise', this.value)">
+                        </div>
+                    </div>
+
+                    <div class="action-config">
+                        <div class="action-header">
+                            <div><span class="color-dot bg-allin"></span> All-In</div>
+                            <input type="number" id="pct-allin" class="pct-input" value="0" oninput="updateBrush('allin', this.value)">%
+                        </div>
+                        <div class="slider-container">
+                            <input type="range" class="slider" min="0" max="100" value="0" oninput="updateBrush('allin', this.value)">
+                        </div>
+                    </div>
+                </div>
+
+                <button class="paint-btn" onclick="switchTab('table-editor')">PRÓXIMO: CONFIGURAR CENÁRIOS ➔</button>
             </div>
-        </div>
-    </div>
 
     <div id="tab-table-editor" class="screen">
         <h2>Configuração de Mesa</h2>
