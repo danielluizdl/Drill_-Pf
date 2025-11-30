@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Poker Ranges Builder - Estrutura</title>
+    <title>Poker Ranges Builder - Formatos</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
 </head>
@@ -13,23 +13,47 @@
     <header>
         <h1>Ranges Builder Pro</h1>
         <nav>
-            <button class="header-btn active" onclick="switchTab('home')">Meus Ranges</button>
-            <button class="header-btn" onclick="switchTab('editor')">Novo Range</button>
+            <button class="header-btn" onclick="switchTab('home')">Meus Ranges</button>
+            <button class="header-btn active" onclick="switchTab('format')">Novo Range</button>
             <button class="header-btn" onclick="switchTab('drill')">Treinar</button>
         </nav>
     </header>
 
-    <div id="tab-home" class="screen active">
+    <div id="tab-home" class="screen">
         <h2>Meus Ranges</h2>
         <p>A lista de ranges salvos aparecerá aqui.</p>
+        <div id="saved-ranges-list" class="range-list">
+            <div class="empty-state" style="text-align:center; padding:20px; color:#999;">Vazio.</div>
+        </div>
+    </div>
+
+    <div id="tab-format" class="screen active" style="text-align:center;">
+        <h2>Selecione o Formato</h2>
+        <div class="format-options">
+            <div class="format-card" onclick="setTableFormat(6)">
+                <div class="format-icon">👤6</div>
+                <h3>6-Max</h3>
+                <p style="font-size:0.8rem; color:#666;">SB, BB, UTG, MP, CO, BTN</p>
+            </div>
+            <div class="format-card" onclick="setTableFormat(8)">
+                <div class="format-icon">👤8</div>
+                <h3>8-Max</h3>
+                <p style="font-size:0.8rem; color:#666;">+ UTG+1 e Straddle</p>
+            </div>
+        </div>
     </div>
 
     <div id="tab-editor" class="screen">
         <div class="editor-layout">
             <div>
-                <h2>Novo Range</h2>
+                <h2>Novo Range <span id="format-label" style="font-size:0.8rem; color:#888;"></span></h2>
                 <div class="input-group">
-                    <label>Nome do Range</label>
+                    <label>1. Posições (Selecionar)</label>
+                    <div class="pos-filter-container editor-pos-selector" id="editor-pos-select"></div>
+                </div>
+
+                <div class="input-group">
+                    <label>2. Nome do Range</label>
                     <input type="text" id="range-name" class="form-control" placeholder="Ex: Defesa BB vs UTG">
                 </div>
                 
@@ -37,54 +61,48 @@
             </div>
             
             <div class="strategy-panel">
-                <h3>Ações & Frequências</h3>
-                
+                <h3>3. Ações</h3>
                 <div class="brush-builder">
                     <div class="action-config">
-                        <div class="action-header">
-                            <div><span class="color-dot bg-fold"></span> Fold</div>
-                            <input type="text" id="pct-fold" class="pct-input" value="100" disabled>%
-                        </div>
+                        <div class="action-header"><div><span class="color-dot bg-fold"></span> Fold</div><input type="text" id="pct-fold" class="pct-input" value="100" disabled>%</div>
                     </div>
-
                     <div class="action-config">
-                        <div class="action-header">
-                            <div><span class="color-dot bg-call"></span> Call</div>
-                            <input type="number" id="pct-call" class="pct-input" value="0" oninput="updateBrush('call', this.value)">%
-                        </div>
-                        <div class="slider-container">
-                            <input type="range" class="slider" min="0" max="100" value="0" oninput="updateBrush('call', this.value)">
-                        </div>
+                        <div class="action-header"><div><span class="color-dot bg-call"></span> Call</div><input type="number" id="pct-call" class="pct-input" value="0" oninput="updateBrush('call', this.value)">%</div>
+                        <div class="slider-container"><input type="range" class="slider" min="0" max="100" value="0" oninput="updateBrush('call', this.value)"></div>
                     </div>
-
                     <div class="action-config">
-                        <div class="action-header">
-                            <div><span class="color-dot bg-raise"></span> Raise</div>
-                            <input type="number" id="pct-raise" class="pct-input" value="0" oninput="updateBrush('raise', this.value)">%
-                        </div>
-                        <div class="slider-container">
-                            <input type="range" class="slider" min="0" max="100" value="0" oninput="updateBrush('raise', this.value)">
-                        </div>
+                        <div class="action-header"><div><span class="color-dot bg-raise"></span> Raise</div><input type="number" id="pct-raise" class="pct-input" value="0" oninput="updateBrush('raise', this.value)">%</div>
+                        <div class="slider-container"><input type="range" class="slider" min="0" max="100" value="0" oninput="updateBrush('raise', this.value)"></div>
                     </div>
-
                     <div class="action-config">
-                        <div class="action-header">
-                            <div><span class="color-dot bg-allin"></span> All-In</div>
-                            <input type="number" id="pct-allin" class="pct-input" value="0" oninput="updateBrush('allin', this.value)">%
-                        </div>
-                        <div class="slider-container">
-                            <input type="range" class="slider" min="0" max="100" value="0" oninput="updateBrush('allin', this.value)">
-                        </div>
+                        <div class="action-header"><div><span class="color-dot bg-allin"></span> All-In</div><input type="number" id="pct-allin" class="pct-input" value="0" oninput="updateBrush('allin', this.value)">%</div>
+                        <div class="slider-container"><input type="range" class="slider" min="0" max="100" value="0" oninput="updateBrush('allin', this.value)"></div>
                     </div>
                 </div>
-
-                <button class="paint-btn" onclick="switchTab('table-editor')">PRÓXIMO: CONFIGURAR CENÁRIOS ➔</button>
+                <button class="btn-reset-range" onclick="resetRangeGrid()">🗑 Limpar Grid</button>
+                <button class="paint-btn" onclick="switchTab('table-editor')">PRÓXIMO: MESA ➔</button>
             </div>
+        </div>
+    </div>
 
     <div id="tab-table-editor" class="screen">
-        <h2>Configuração de Mesa</h2>
-        <p>A mesa oval verde ficará aqui.</p>
-        <button onclick="switchTab('editor')">Voltar</button>
+        <div class="table-editor-grid">
+            <div style="display:flex; flex-direction:column; gap:10px;">
+                <h3>4. Ação na Mesa</h3>
+                <p style="font-size:0.8rem; color:#666; margin:0;">Selecione o HERO na bolinha.</p>
+                <div class="ante-input-group">
+                    <label>Ante (bb):</label>
+                    <input type="number" id="ante-input" class="ante-input" value="0" step="0.1" onchange="currentAnte=parseFloat(this.value)">
+                </div>
+                <div class="config-list" id="pos-config-list"></div>
+            </div>
+            <div>
+                <div style="text-align:center; padding:50px; background:#222; border-radius:20px; color:#fff;">
+                    (Visual da Mesa será implementado no próximo passo)
+                </div>
+                <button class="paint-btn" style="background:#999; margin-top:20px;" onclick="switchTab('editor')">Voltar</button>
+            </div>
+        </div>
     </div>
 
     <div id="tab-drill" class="screen">
