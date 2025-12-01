@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Poker Ranges Builder - Formatos</title>
+    <title>Poker GTO Builder Pro (v93)</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
 </head>
@@ -11,76 +11,120 @@
 
 <div id="app-container">
     <header>
-        <h1>Ranges Builder Pro</h1>
+        <h1 onclick="switchTab('landing')">GTO Builder Pro</h1>
         <nav>
-            <button class="header-btn" onclick="switchTab('home')">Meus Ranges</button>
-            <button class="header-btn active" onclick="switchTab('format')">Novo Range</button>
+            <button class="header-btn" onclick="switchTab('landing')">Início</button>
+            <button class="header-btn" onclick="switchTab('home')">Ranges Salvos</button>
+            <button class="header-btn" onclick="switchTab('format')">Novo Range</button>
             <button class="header-btn" onclick="switchTab('drill')">Treinar</button>
         </nav>
     </header>
 
-    <div id="tab-home" class="screen">
-        <h2>Meus Ranges</h2>
-        <p>A lista de ranges salvos aparecerá aqui.</p>
-        <div id="saved-ranges-list" class="range-list">
-            <div class="empty-state" style="text-align:center; padding:20px; color:#999;">Vazio.</div>
+    <div id="tab-landing" class="screen active">
+        <h2 style="font-size:2rem; margin-bottom:10px;">Bem-vindo ao GTO Builder</h2>
+        <p style="color:var(--text-secondary);">O que você deseja fazer hoje?</p>
+        <div class="landing-grid">
+            <div class="landing-card" onclick="switchTab('format')">
+                <div class="landing-icon">✚</div>
+                <div class="landing-title">Criar Ranges</div>
+            </div>
+            <div class="landing-card" onclick="switchTab('home')">
+                <div class="landing-icon">📂</div>
+                <div class="landing-title">Ranges Salvos</div>
+            </div>
+            <div class="landing-card" onclick="switchTab('drill')">
+                <div class="landing-icon">🎯</div>
+                <div class="landing-title">Drills</div>
+            </div>
         </div>
     </div>
 
-    <div id="tab-format" class="screen active" style="text-align:center;">
-        <h2>Selecione o Formato</h2>
-        <div class="format-options">
-            <div class="format-card" onclick="setTableFormat(6)">
-                <div class="format-icon">👤6</div>
-                <h3>6-Max</h3>
-                <p style="font-size:0.8rem; color:#666;">SB, BB, UTG, MP, CO, BTN</p>
+    <div id="tab-format" class="screen" style="text-align:center;">
+        <h2 style="font-size:1.8rem; margin-bottom:10px;">Selecione o Formato</h2>
+        <div class="landing-grid">
+            <div class="landing-card" onclick="setTableFormat(6)">
+                <div class="landing-icon">👤6</div>
+                <div class="landing-title">6-Max</div>
+                <p style="font-size:0.8rem; color:#666; margin-top:5px;">Sem Straddle<br>Ante 0</p>
             </div>
-            <div class="format-card" onclick="setTableFormat(8)">
-                <div class="format-icon">👤8</div>
-                <h3>8-Max</h3>
-                <p style="font-size:0.8rem; color:#666;">+ UTG+1 e Straddle</p>
+            <div class="landing-card" onclick="setTableFormat(8)">
+                <div class="landing-icon">👤8</div>
+                <div class="landing-title">8-Max</div>
+                <p style="font-size:0.8rem; color:#666; margin-top:5px;">Com Straddle<br>Ante 0.5</p>
             </div>
+        </div>
+    </div>
+
+    <div id="tab-home" class="screen">
+        <div class="pos-filter-container" id="home-pos-filter"></div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+            <h2 style="margin:0;">Meus Ranges</h2>
+        </div>
+        <div id="saved-ranges-list" class="range-list">
+            <div class="empty-state" style="grid-column: 1/-1; text-align:center; padding:40px; color:#999;">Nenhum range criado.</div>
         </div>
     </div>
 
     <div id="tab-editor" class="screen">
         <div class="editor-layout">
             <div>
-                <h2>Novo Range <span id="format-label" style="font-size:0.8rem; color:#888;"></span></h2>
                 <div class="input-group">
-                    <label>1. Posições (Selecionar)</label>
+                    <label>1. Posições (<span id="format-display"></span>)</label>
                     <div class="pos-filter-container editor-pos-selector" id="editor-pos-select"></div>
                 </div>
-
                 <div class="input-group">
                     <label>2. Nome do Range</label>
                     <input type="text" id="range-name" class="form-control" placeholder="Ex: Defesa BB vs UTG">
                 </div>
-                
                 <div id="hand-matrix"></div>
             </div>
             
             <div class="strategy-panel">
-                <h3>3. Ações</h3>
+                <h3>3. Ações & Frequências</h3>
                 <div class="brush-builder">
                     <div class="action-config">
-                        <div class="action-header"><div><span class="color-dot bg-fold"></span> Fold</div><input type="text" id="pct-fold" class="pct-input" value="100" disabled>%</div>
+                        <div class="action-header">
+                            <div><span class="color-dot bg-fold"></span> Fold</div>
+                            <input type="text" id="pct-fold" class="pct-input" value="100" disabled>%
+                        </div>
                     </div>
                     <div class="action-config">
-                        <div class="action-header"><div><span class="color-dot bg-call"></span> Call</div><input type="number" id="pct-call" class="pct-input" value="0" oninput="updateBrush('call', this.value)">%</div>
+                        <div class="action-header">
+                            <div><span class="color-dot bg-call"></span> Call</div>
+                            <input type="number" id="pct-call" class="pct-input" value="0" oninput="updateBrush('call', this.value)">%
+                        </div>
                         <div class="slider-container"><input type="range" class="slider" min="0" max="100" value="0" oninput="updateBrush('call', this.value)"></div>
+                        <div class="quick-pcts">
+                            <button class="quick-btn" onclick="updateBrush('call', 0)">0%</button>
+                            <button class="quick-btn" onclick="updateBrush('call', 50)">50%</button>
+                            <button class="quick-btn" onclick="updateBrush('call', 100)">100%</button>
+                        </div>
                     </div>
                     <div class="action-config">
-                        <div class="action-header"><div><span class="color-dot bg-raise"></span> Raise</div><input type="number" id="pct-raise" class="pct-input" value="0" oninput="updateBrush('raise', this.value)">%</div>
+                        <div class="action-header">
+                            <div><span class="color-dot bg-raise"></span> Raise</div>
+                            <div style="display:flex; gap:5px;">
+                                <input type="text" id="val-raise" class="bb-input" placeholder="BB">
+                                <input type="number" id="pct-raise" class="pct-input" value="0" oninput="updateBrush('raise', this.value)">%
+                            </div>
+                        </div>
                         <div class="slider-container"><input type="range" class="slider" min="0" max="100" value="0" oninput="updateBrush('raise', this.value)"></div>
+                         <div class="quick-pcts">
+                            <button class="quick-btn" onclick="updateBrush('raise', 0)">0%</button>
+                            <button class="quick-btn" onclick="updateBrush('raise', 50)">50%</button>
+                            <button class="quick-btn" onclick="updateBrush('raise', 100)">100%</button>
+                        </div>
                     </div>
                     <div class="action-config">
-                        <div class="action-header"><div><span class="color-dot bg-allin"></span> All-In</div><input type="number" id="pct-allin" class="pct-input" value="0" oninput="updateBrush('allin', this.value)">%</div>
+                        <div class="action-header">
+                            <div><span class="color-dot bg-allin"></span> All-In</div>
+                            <input type="number" id="pct-allin" class="pct-input" value="0" oninput="updateBrush('allin', this.value)">%
+                        </div>
                         <div class="slider-container"><input type="range" class="slider" min="0" max="100" value="0" oninput="updateBrush('allin', this.value)"></div>
                     </div>
                 </div>
                 <button class="btn-reset-range" onclick="resetRangeGrid()">🗑 Limpar Grid</button>
-                <button class="paint-btn" onclick="switchTab('table-editor')">PRÓXIMO: MESA ➔</button>
+                <button class="paint-btn" onclick="goToTableEditor()">PRÓXIMO: MESA ➔</button>
             </div>
         </div>
     </div>
@@ -90,24 +134,77 @@
             <div style="display:flex; flex-direction:column; gap:10px;">
                 <h3>4. Ação na Mesa</h3>
                 <p style="font-size:0.8rem; color:#666; margin:0;">Selecione o HERO na bolinha.</p>
+                <button onclick="initTableConfigList()" class="btn-reset-small">↺ Resetar</button>
+                
                 <div class="ante-input-group">
                     <label>Ante (bb):</label>
-                    <input type="number" id="ante-input" class="ante-input" value="0" step="0.1" onchange="currentAnte=parseFloat(this.value)">
+                    <input type="number" id="ante-input" class="ante-input" step="0.1" onchange="updateTableVisual()">
                 </div>
+
                 <div class="config-list" id="pos-config-list"></div>
             </div>
             <div>
-                <div style="text-align:center; padding:50px; background:#222; border-radius:20px; color:#fff;">
-                    (Visual da Mesa será implementado no próximo passo)
+                <div class="table-preview-container">
+                    <div class="poker-table-visual" id="visual-table"></div>
+                    <div id="scenario-summary" style="margin-top: 10px; color: #aaa; font-size: 0.85rem; text-align:center;">...</div>
                 </div>
-                <button class="paint-btn" style="background:#999; margin-top:20px;" onclick="switchTab('editor')">Voltar</button>
+                <div class="info-panel" style="margin-top:20px;">
+                    <div style="background:#f3f4f6; padding:15px; border-radius:12px; border:1px solid #ddd;">
+                        <input type="hidden" id="final-pot-input" value="0">
+                        <button class="paint-btn" style="background:var(--color-call); margin-top:0;" onclick="addScenarioToBuffer()">+ ADICIONAR CENÁRIO</button>
+                    </div>
+                    <div style="margin-top:15px;">
+                        <h4 style="margin:0 0 5px 0; font-size:0.9rem; color:#666;">Cenários Salvos:</h4>
+                        <div id="scenario-buffer-list" style="min-height:20px;"><em style="font-size:0.8rem; color:#999;">Nenhum cenário adicionado ainda.</em></div>
+                    </div>
+                    <div style="display:flex; gap:10px; margin-top:20px; border-top:1px solid #eee; padding-top:20px;">
+                        <button class="paint-btn" style="background:#1f2937;" onclick="finalizeRange()">✅ FINALIZAR</button>
+                        <button class="paint-btn" style="background:#999; width:120px;" onclick="switchTab('editor')">VOLTAR</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
     <div id="tab-drill" class="screen">
-        <h2>Modo Treino</h2>
-        <p>O jogo interativo será aqui.</p>
+        <div id="drill-select-ranges" style="text-align:center;">
+            <h2>1. Selecione Ranges</h2>
+            <div id="drill-range-grid" class="range-list" style="max-width:800px; margin:30px auto;"></div>
+            <button class="paint-btn" style="max-width:200px;" onclick="goToDrillFilter()">CONTINUAR ➔</button>
+        </div>
+        <div id="drill-setup-filter" style="text-align:center; display:none;">
+            <h2>2. Filtro de Mãos</h2>
+            <div id="drill-filter-container"><div id="drill-matrix"></div></div>
+            <button class="paint-btn" style="max-width:200px;" onclick="startDrillSession()">INICIAR</button>
+        </div>
+        <div id="drill-active" style="display:none;">
+             <div class="table-preview-container" style="margin:0 auto; max-width:750px;">
+                <div class="poker-table-visual" id="drill-table-area" style="transform:scale(0.9);"></div>
+                <div id="drill-hero-cards" class="card-display"></div>
+                <div style="position:absolute; bottom:5px; left:50%; transform:translateX(-50%); z-index:30;">
+                    <button class="btn-next-hand" onclick="nextDrillHand()">Próxima Mão ➔</button>
+                </div>
+            </div>
+            <div style="margin-top:-30px; position:relative; z-index:30;">
+                <div class="drill-controls">
+                    <button class="action-btn btn-f" onclick="checkDrill('Fold')">FOLD</button>
+                    <button class="action-btn btn-c" onclick="checkDrill('Call')">CALL</button>
+                    <button id="btn-drill-raise" class="action-btn btn-r" onclick="checkDrill('Raise')">RAISE</button>
+                    <button class="action-btn btn-a" onclick="checkDrill('Allin')">ALL IN</button>
+                </div>
+            </div>
+            <div id="drill-feedback" class="drill-feedback"></div>
+            <div id="drill-range-info" style="margin-top:10px; font-size:0.85rem; color:#888;"></div>
+             <button class="header-btn" onclick="stopDrill()">Sair</button>
+        </div>
+    </div>
+</div>
+
+<div id="range-modal" class="modal-overlay">
+    <div class="modal-content">
+        <button class="close-modal" onclick="closeRangeModal()">✕</button>
+        <h2 id="modal-range-title">Range</h2>
+        <div id="modal-range-matrix"></div>
     </div>
 </div>
 
