@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Poker GTO Builder Pro (v93)</title>
+    <title>Poker Ranges Builder - Dia 5 (v94)</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
 </head>
@@ -11,7 +11,7 @@
 
 <div id="app-container">
     <header>
-        <h1 onclick="switchTab('landing')">GTO Builder Pro</h1>
+        <h1 onclick="switchTab('landing')">Ranges Builder Pro</h1>
         <nav>
             <button class="header-btn" onclick="switchTab('landing')">Início</button>
             <button class="header-btn" onclick="switchTab('home')">Ranges Salvos</button>
@@ -45,23 +45,40 @@
             <div class="landing-card" onclick="setTableFormat(6)">
                 <div class="landing-icon">👤6</div>
                 <div class="landing-title">6-Max</div>
-                <p style="font-size:0.8rem; color:#666; margin-top:5px;">Sem Straddle<br>Ante 0</p>
+                <p style="font-size:0.8rem; color:#666; margin-top:5px;">SB, BB, UTG, MP, CO, BTN</p>
             </div>
             <div class="landing-card" onclick="setTableFormat(8)">
                 <div class="landing-icon">👤8</div>
                 <div class="landing-title">8-Max</div>
-                <p style="font-size:0.8rem; color:#666; margin-top:5px;">Com Straddle<br>Ante 0.5</p>
+                <p style="font-size:0.8rem; color:#666; margin-top:5px;">+ UTG+1 e Straddle</p>
             </div>
         </div>
     </div>
 
     <div id="tab-home" class="screen">
-        <div class="pos-filter-container" id="home-pos-filter"></div>
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-            <h2 style="margin:0;">Meus Ranges</h2>
+        <div id="home-format-selection" class="format-selection-screen">
+            <h2 style="font-size:1.8rem; margin-bottom:10px;">Visualizar Ranges</h2>
+            <div class="landing-grid">
+                <div class="landing-card" onclick="viewHomeFormat(6)">
+                    <div class="landing-icon">👤6</div>
+                    <div class="landing-title">(6-max)</div>
+                </div>
+                <div class="landing-card" onclick="viewHomeFormat(8)">
+                    <div class="landing-icon">👤8</div>
+                    <div class="landing-title">(8-max)</div>
+                </div>
+            </div>
         </div>
-        <div id="saved-ranges-list" class="range-list">
-            <div class="empty-state" style="grid-column: 1/-1; text-align:center; padding:40px; color:#999;">Nenhum range criado.</div>
+
+        <div id="home-list-container" style="display:none;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <button onclick="backToHomeFormat()" class="btn-reset-small">⬅ Voltar</button>
+                <h2 style="margin:0;" id="home-list-title">Meus Ranges</h2>
+                <div style="width:70px;"></div> </div>
+            <div class="pos-filter-container" id="home-pos-filter"></div>
+            <div id="saved-ranges-list" class="range-list">
+                <div class="empty-state" style="grid-column: 1/-1; text-align:center; padding:20px; color:#999;">Vazio.</div>
+            </div>
         </div>
     </div>
 
@@ -167,17 +184,53 @@
     </div>
 
     <div id="tab-drill" class="screen">
-        <div id="drill-select-ranges" style="text-align:center;">
-            <h2>1. Selecione Ranges</h2>
-            <div id="drill-range-grid" class="range-list" style="max-width:800px; margin:30px auto;"></div>
-            <button class="paint-btn" style="max-width:200px;" onclick="goToDrillFilter()">CONTINUAR ➔</button>
+        <div id="drill-format-selection" class="format-selection-screen">
+            <h2 style="font-size:1.8rem; margin-bottom:10px;">Treinar Formato</h2>
+            <div class="landing-grid">
+                <div class="landing-card" onclick="viewDrillFormat(6)">
+                    <div class="landing-icon">👤6</div>
+                    <div class="landing-title">6-Max</div>
+                </div>
+                <div class="landing-card" onclick="viewDrillFormat(8)">
+                    <div class="landing-icon">👤8</div>
+                    <div class="landing-title">8-Max</div>
+                </div>
+            </div>
         </div>
-        <div id="drill-setup-filter" style="text-align:center; display:none;">
-            <h2>2. Filtro de Mãos</h2>
-            <div id="drill-filter-container"><div id="drill-matrix"></div></div>
-            <button class="paint-btn" style="max-width:200px;" onclick="startDrillSession()">INICIAR</button>
+
+        <div id="drill-content-selection" style="display:none;">
+            <div id="drill-select-ranges" style="text-align:center;">
+                <button onclick="backToDrillFormat()" class="btn-reset-small" style="margin-bottom:10px;">⬅ Voltar</button>
+                <h2 id="drill-list-title">1. Selecione Ranges</h2>
+                <div id="drill-range-grid" class="range-list" style="max-width:800px; margin:30px auto;"></div>
+                <button class="paint-btn" style="max-width:200px; margin-top:30px;" onclick="goToDrillFilter()">CONTINUAR ➔</button>
+            </div>
+            <div id="drill-setup-filter" style="text-align:center; display:none;">
+                <h2>2. Filtro de Mãos</h2>
+                <div id="drill-filter-container">
+                    <div class="drill-btn-group">
+                        <button class="btn-reset-small" onclick="drillSelectAll(true)">Selecionar Tudo</button>
+                        <button class="btn-reset-small" onclick="drillSelectAll(false)">Remover Tudo</button>
+                    </div>
+                    <div id="drill-matrix"></div>
+                </div>
+                <button class="paint-btn" style="max-width:200px;" onclick="startDrillSession()">INICIAR</button>
+            </div>
         </div>
+
         <div id="drill-active" style="display:none;">
+             <div class="stats-bar">
+                <div class="stat-item">Mãos: <span id="stat-total">0</span></div>
+                <div class="stat-item stat-correct">Acertos: <span id="stat-correct">0</span></div>
+                <div class="stat-item stat-error">Erros: <span id="stat-errors">0</span></div>
+                <div class="stat-item">Consultas: <span id="stat-consults">0</span></div>
+            </div>
+
+            <div style="display:flex; justify-content:center; align-items:center; margin-bottom:10px; gap:15px;">
+                <h2 id="drill-title" style="margin:0;">Treino</h2>
+                <button class="btn-reset-small" onclick="showRangeModal()">👁 Ver Range</button>
+            </div>
+
              <div class="table-preview-container" style="margin:0 auto; max-width:750px;">
                 <div class="poker-table-visual" id="drill-table-area" style="transform:scale(0.9);"></div>
                 <div id="drill-hero-cards" class="card-display"></div>
@@ -195,7 +248,7 @@
             </div>
             <div id="drill-feedback" class="drill-feedback"></div>
             <div id="drill-range-info" style="margin-top:10px; font-size:0.85rem; color:#888;"></div>
-             <button class="header-btn" onclick="stopDrill()">Sair</button>
+             <button class="header-btn" style="margin-top:20px;" onclick="stopDrill()">Encerrar Treino</button>
         </div>
     </div>
 </div>
