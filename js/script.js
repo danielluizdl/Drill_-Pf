@@ -129,24 +129,27 @@ function resetRangeGrid() {
     if(!confirm("Tem certeza?")) return;
     Object.keys(rangeData.grid).forEach(h => { rangeData.grid[h] = {fold:100, call:0, raise:0, allin:0}; updateCellVisual(h, rangeData.grid[h]); });
 }
+
 function goToTableEditor() {
     const name = document.getElementById('range-name').value;
     if(!name) { alert("Dê um nome."); return; }
     if(selectedEditorPositions.size===0) { alert("Selecione Posição."); return; }
-    rangeData.name = name; rangeData.positions = Array.from(selectedEditorPositions); rangeData.tableSize = currentTableSize;
+    rangeData.name = name; rangeData.positions = Array.from(selectedEditorPositions);
+    rangeData.tableSize = currentTableSize; 
     if(!rangeData.id) tempScenarios = []; 
     initTableConfigList(); switchTab('table-editor');
 }
+
 function editRange(id) {
     const r = ranges.find(x => x.id === id); if(!r) return;
     setTableFormat(r.tableSize || 8);
     rangeData = { id: r.id, name: r.name, positions: r.positions, grid: JSON.parse(JSON.stringify(r.grid)), tableSize: r.tableSize || 8 };
     tempScenarios = r.scenarios ? JSON.parse(JSON.stringify(r.scenarios)) : [];
     if(tempScenarios.length > 0 && tempScenarios[0].ante !== undefined) { currentAnte = tempScenarios[0].ante; }
-    document.getElementById('range-name').value = r.name; selectedEditorPositions = new Set(r.positions);
-    initUI();
+    document.getElementById('range-name').value = r.name; 
+    selectedEditorPositions = new Set(r.positions);
+    initUI(); 
     Object.keys(rangeData.grid).forEach(h => { updateCellVisual(h, rangeData.grid[h]); });
-    switchTab('editor');
 }
 
 function initTableConfigList() {
@@ -154,49 +157,81 @@ function initTableConfigList() {
     document.getElementById('ante-input').value = currentAnte;
     activePositions.forEach(pos => {
         let dRole = 'fold'; let dBet = 0;
-        if(pos.id === 'sb') { dRole = 'post'; dBet = 0.5; } if(pos.id === 'bb') { dRole = 'post'; dBet = 1.0; } 
+        if(pos.id === 'sb') { dRole = 'post'; dBet = 0.5; } 
+        if(pos.id === 'bb') { dRole = 'post'; dBet = 1.0; } 
         if(pos.id === 'str' && currentTableSize === 8) { dRole = 'post'; dBet = 2.0; }
         currentScenario[pos.id] = { role: dRole, bet: dBet, isHero: false, stack: 250 }; 
         const row = document.createElement('div'); row.className = 'pos-config-row';
-        row.innerHTML = `<input type="radio" name="hero-select" class="hero-radio" onclick="updateHero('${pos.id}')" title="HERO"><div class="pos-label">${pos.label}</div><select class="role-select" onchange="updateRole('${pos.id}', this.value)" style="${dBet>0?'font-weight:bold;':''}"><option value="fold" ${dRole==='fold'?'selected':''}>Fold</option><option value="post" ${dRole==='post'?'selected':''}>Blind/Post</option><option value="limp">Limp</option><option value="open">Open Raise</option><option value="iso">Iso / 3-Bet</option><option value="call">Call</option><option value="allin">All-in</option></select><input type="number" id="stack-${pos.id}" class="stack-input" value="250" onchange="updateStack('${pos.id}', this.value)" title="Stack"><input type="number" id="bet-${pos.id}" class="bet-input" placeholder="bb" step="0.1" value="${dBet > 0 ? dBet : ''}" style="display:${dBet>0?'block':'none'}" onchange="updateBet('${pos.id}', this.value)">`;
+        row.innerHTML = `
+            <input type="radio" name="hero-select" class="hero-radio" onclick="updateHero('${pos.id}')" title="HERO">
+            <div class="pos-label">${pos.label}</div>
+            <select class="role-select" onchange="updateRole('${pos.id}', this.value)" style="${dBet>0?'font-weight:bold;':''}">
+                <option value="fold" ${dRole==='fold'?'selected':''}>Fold</option>
+                <option value="post" ${dRole==='post'?'selected':''}>Blind/Post</option>
+                <option value="limp">Limp</option>
+                <option value="open">Open Raise</option>
+                <option value="iso">Iso / 3-Bet</option>
+                <option value="call">Call</option>
+                <option value="allin">All-in</option>
+            </select>
+            <input type="number" id="stack-${pos.id}" class="stack-input" value="250" onchange="updateStack('${pos.id}', this.value)" title="Stack">
+            <input type="number" id="bet-${pos.id}" class="bet-input" placeholder="bb" step="0.1" value="${dBet > 0 ? dBet : ''}" style="display:${dBet>0?'block':'none'}" onchange="updateBet('${pos.id}', this.value)">
+        `;
         list.appendChild(row);
     }); updateTableVisual();
 }
+
 function updateHero(pid) { activePositions.forEach(p => currentScenario[p.id].isHero = (p.id === pid)); updateTableVisual(); }
 function updateStack(pid, val) { currentScenario[pid].stack = val; updateTableVisual(); }
+
 function updateRole(pid, role) {
     currentScenario[pid].role = role; const input = document.getElementById(`bet-${pid}`); let val = 0;
     if(role === 'open') val = 2.0; else if(role === 'iso') val = 6.0; else if(role === 'limp') val = 1.0; 
     else if(role === 'post' && pid==='sb') val=0.5; else if(role === 'post' && pid==='bb') val=1.0; 
     else if(role === 'post' && pid==='str' && currentTableSize === 8) val=2.0;
-    if(role === 'fold') { if(pid === 'sb') val = 0.5; else if(pid === 'bb') val = 1.0; else if(pid === 'str' && currentTableSize === 8) val = 2.0; else val = 0; }
-    if(val > 0 || ['call','allin'].includes(role)) { input.style.display = 'block'; if(val > 0) { input.value = val; currentScenario[pid].bet = val; } } else { input.style.display = 'none'; currentScenario[pid].bet = val; }
+    if(val > 0 || ['call','allin'].includes(role)) {
+        input.style.display = 'block'; if(val > 0) { input.value = val; currentScenario[pid].bet = val; }
+    } else {
+        input.style.display = 'none';
+        if(role === 'fold') {
+            if(pid === 'sb') currentScenario[pid].bet = 0.5;
+            else if(pid === 'bb') currentScenario[pid].bet = 1.0;
+            else if(pid === 'str' && currentTableSize === 8) currentScenario[pid].bet = 2.0;
+            else currentScenario[pid].bet = 0;
+        } else {
+            currentScenario[pid].bet = 0;
+        }
+    }
     updateTableVisual();
 }
+
 function updateBet(pid, val) { currentScenario[pid].bet = parseFloat(val) || 0; updateTableVisual(); }
 
 function updateTableVisual(targetId = 'visual-table') {
     const container = document.getElementById(targetId);
     container.querySelectorAll('.seat-visual, .chip-container, .dealer-btn, .table-center-pot, .stack-display, .player-cards-container').forEach(e => e.remove());
+    
     let anteVal = parseFloat(document.getElementById('ante-input') ? document.getElementById('ante-input').value : currentAnte) || 0;
     currentAnte = anteVal;
     let numPlayers = activePositions.length;
     let calcPot = (anteVal * numPlayers); 
+    
     let heroPosIndex = activePositions.findIndex(p => currentScenario[p.id].isHero);
     if (heroPosIndex === -1) heroPosIndex = 0; 
 
     for (let i = 0; i < numPlayers; i++) {
-        let logicalIndex = (heroPosIndex + i) % numPlayers; let pos = activePositions[logicalIndex]; let data = currentScenario[pos.id];
+        let logicalIndex = (heroPosIndex + i) % numPlayers;
+        let pos = activePositions[logicalIndex];
+        let data = currentScenario[pos.id];
         calcPot += parseFloat(data.bet || 0);
         let coords = activeSlots[i]; 
+        
         const seat = document.createElement('div');
         let classes = `seat-visual ${pos.class}`;
         if(data.isHero) classes += ' hero'; else if(data.role === 'fold') classes += ' folded'; else classes += ' active-player';
-        // HIGHLIGHT AGRESSOR
         if(['open','iso','allin'].includes(data.role) || (data.bet > 2 && data.role !== 'post' && data.role !== 'limp' && data.role !== 'fold')) {
              classes += ' aggressor';
         }
-
         seat.className = classes; seat.style.top = coords.t + '%'; seat.style.left = coords.l + '%';
         let html = `<div>${pos.label}</div>`; if(data.isHero) html += `<small style="font-size:0.6rem; color:#ffd700;">HERO</small>`;
         seat.innerHTML = html;
@@ -207,9 +242,12 @@ function updateTableVisual(targetId = 'visual-table') {
         if(pos.id === 'btn') { const btn = document.createElement('div'); btn.className = 'dealer-btn'; btn.innerText = 'D'; let dOffset = currentTableSize === 6 ? 15 : 12; let dTop = coords.t < 50 ? coords.t + dOffset : coords.t - dOffset; let dLeft = coords.l < 50 ? coords.l + dOffset : coords.l - dOffset; btn.style.top = dTop + '%'; btn.style.left = dLeft + '%'; container.appendChild(btn); }
     }
     if(anteVal > 0) { const anteStack = getChipStackHTML((anteVal*numPlayers).toFixed(1)); anteStack.style.top = '55%'; anteStack.style.left = '50%'; anteStack.style.transform = 'translate(-50%, -50%) scale(0.8)'; anteStack.style.opacity = '0.7'; container.appendChild(anteStack); }
-    const potDiv = document.createElement('div'); potDiv.className = 'table-center-pot'; potDiv.innerHTML = `<div class="pot-label">POTE TOTAL</div><div class="pot-value">${calcPot.toFixed(1)} bb</div>`; container.appendChild(potDiv);
+    const potDiv = document.createElement('div'); potDiv.className = 'table-center-pot';
+    potDiv.innerHTML = `<div class="pot-label">POTE TOTAL</div><div class="pot-value">${calcPot.toFixed(1)} bb</div>`;
+    container.appendChild(potDiv);
     if(targetId === 'visual-table') { document.getElementById('final-pot-input').value = calcPot.toFixed(1); document.getElementById('scenario-summary').innerHTML = getScenarioSummary(currentScenario); }
 }
+
 function getChipStackHTML(amount) {
     const container = document.createElement('div'); container.className = 'chip-container';
     let colorClass = 'chips-red'; let stackCount = 2;
@@ -218,6 +256,7 @@ function getChipStackHTML(amount) {
     let stackHTML = ''; for(let i=0; i<stackCount; i++) { stackHTML += `<div class="chip-disc" style="bottom:${i*3}px;"></div>`; }
     container.innerHTML = `<div class="${colorClass} chip-stack-visual">${stackHTML}</div><div class="chip-text">${amount} bb</div>`; return container;
 }
+
 function getScenarioSummary(scenarioData) {
     let acts = [];
     activePositions.forEach(p => {
@@ -228,6 +267,7 @@ function getScenarioSummary(scenarioData) {
         }
     }); return acts.length===0 ? "Nenhuma ação agressiva" : acts.join(' ➔ ');
 }
+
 function addScenarioToBuffer() {
     let heroP = activePositions.find(p => currentScenario[p.id].isHero);
     if (heroP) {
@@ -249,7 +289,9 @@ function finalizeRange() {
     const isEditing = rangeData.id !== null; const newId = isEditing ? rangeData.id : Date.now();
     const finalObj = { id: newId, name: rangeData.name, positions: rangeData.positions, grid: JSON.parse(JSON.stringify(rangeData.grid)), scenarios: JSON.parse(JSON.stringify(tempScenarios)), tableSize: currentTableSize };
     if (isEditing) { const index = ranges.findIndex(r => r.id === newId); if(index !== -1) ranges[index] = finalObj; else ranges.push(finalObj); } else { ranges.push(finalObj); }
-    localStorage.setItem('pokerRangesV93', JSON.stringify(ranges)); rangeData = { id: null, name: '', grid: {}, positions: [] }; tempScenarios = []; alert(isEditing ? "Range Atualizado!" : "Novo Range Salvo!"); switchTab('home');
+    localStorage.setItem('pokerRangesV93', JSON.stringify(ranges)); 
+    rangeData = { id: null, name: '', grid: {}, positions: [] }; tempScenarios = [];
+    alert(isEditing ? "Range Atualizado!" : "Novo Range Salvo!"); switchTab('home');
 }
 function filterHome(pos, btn) { currentHomeFilter = pos; document.querySelectorAll('#home-pos-filter .pos-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); renderRangeList(); }
 function renderRangeList(formatFilter = 0) {
@@ -284,9 +326,61 @@ function updateStatsDisplay() { document.getElementById('stat-total').innerText 
 function showRangeModal() { if(!activeDrillRange) return; const matrixDiv = document.getElementById('modal-range-matrix'); document.getElementById('modal-range-title').innerText = activeDrillRange.name; matrixDiv.innerHTML = ''; for(let i=0; i<13; i++){ for(let j=0; j<13; j++){ let h = i===j ? RANKS[i]+RANKS[j] : (i<j ? RANKS[i]+RANKS[j]+'s' : RANKS[j]+RANKS[i]+'o'); let div = document.createElement('div'); div.className = 'cell'; div.style.cursor='default'; div.innerHTML = `<div class="cell-bg"></div><span>${h}</span>`; let data = activeDrillRange.grid[h]; if(data) { let p1=data.allin, p2=p1+data.raise, p3=p2+data.call; div.querySelector('.cell-bg').style.background = `linear-gradient(to right, var(--color-allin) 0% ${p1}%, var(--color-raise) ${p1}% ${p2}%, var(--color-call) ${p2}% ${p3}%, transparent ${p3}% 100%)`; } matrixDiv.appendChild(div); }} document.getElementById('range-modal').style.display = 'flex'; sessionStats.consults++; updateStatsDisplay(); }
 function closeRangeModal() { document.getElementById('range-modal').style.display = 'none'; }
 function nextDrillHand() { document.getElementById('drill-feedback').innerHTML = ''; document.getElementById('drill-range-info').innerText = ''; let candidates = []; selectedDrillRangeIds.forEach(id => { const r = ranges.find(x => x.id === id); if(r) { let validHands = Object.keys(r.grid).filter(h => !drillExcludedHands.has(h)); if(validHands.length > 0) candidates.push({range: r, hands: validHands}); } }); if(candidates.length === 0) { alert("Nenhuma mão selecionada!"); stopDrill(); return; } const selection = candidates[Math.floor(Math.random() * candidates.length)]; activeDrillRange = selection.range; activeHand = selection.hands[Math.floor(Math.random() * selection.hands.length)]; const r1=activeHand[0], r2=activeHand[1], t=activeHand.length===3?activeHand[2]:''; let s1 = t==='o'||t==='' ? SUITS[Math.floor(Math.random()*4)] : 'h'; if(t === 's') s1 = SUITS[Math.floor(Math.random()*4)]; let s2 = s1; if(t === 'o' || t === '') { while(s2 === s1) s2 = SUITS[Math.floor(Math.random()*4)]; } if(t === 's') s2 = s1; document.getElementById('drill-hero-cards').innerHTML = `<div class="card card-${s1}"><div class="card-corner top-left">${r1}</div><div class="card-suit">${SUIT_ICONS[s1]}</div><div class="card-corner bottom-right">${r1}</div></div><div class="card card-${s2}"><div class="card-corner top-left">${r2}</div><div class="card-suit">${SUIT_ICONS[s2]}</div><div class="card-corner bottom-right">${r2}</div></div>`; let scenArray = activeDrillRange.scenarios || []; if(scenArray.length > 0) { let rndScen = scenArray[Math.floor(Math.random() * scenArray.length)]; currentScenario = rndScen.data; currentAnte = rndScen.ante || 0; let rSize = activeDrillRange.tableSize || 8; if(rSize === 6) { activePositions = POS_6MAX; activeSlots = SLOTS_6MAX; } else { activePositions = POS_8MAX; activeSlots = SLOTS_8MAX; } updateTableVisual('drill-table-area'); } document.getElementById('drill-range-info').innerText = `Situação: ${activeDrillRange.name}`; const d = activeDrillRange.grid[activeHand]; const btnR = document.getElementById('btn-drill-raise'); if(d.size > 0) btnR.innerText = `RAISE (${d.size})`; else btnR.innerText = 'RAISE'; }
-function checkDrill(act) { sessionStats.hands++; const d = activeDrillRange.grid[activeHand]; let pct = 0; if(act==='Fold') pct = d.fold; if(act==='Call') pct = d.call; if(act==='Raise') pct = d.raise; if(act==='Allin') pct = d.allin; const fb = document.getElementById('drill-feedback'); let maxVal = Math.max(d.fold, d.call, d.raise, d.allin); if(pct > 0 && pct >= maxVal - 20) { fb.innerHTML = `<span style="color:green">CORRETO!</span> ${act} (${pct}%)`; sessionStats.correct++; updateStatsDisplay(); setTimeout(nextDrillHand, 1000); } else { fb.innerHTML = `<span style="color:red">ERRO!</span> Melhor: ${getBestAction(d)}`; sessionStats.errors++; updateStatsDisplay(); } }
+
+// --- DRILL FEEDBACK MELHORADO v94 ---
+function checkDrill(act) { 
+    sessionStats.hands++; 
+    const d = activeDrillRange.grid[activeHand]; 
+    let pct = 0; 
+    if(act==='Fold') pct = d.fold; 
+    if(act==='Call') pct = d.call; 
+    if(act==='Raise') pct = d.raise; 
+    if(act==='Allin') pct = d.allin; 
+
+    const fb = document.getElementById('drill-feedback'); 
+    let maxVal = Math.max(d.fold, d.call, d.raise, d.allin); 
+    
+    if(pct > 0 && pct >= maxVal - 20) { 
+        fb.innerHTML = `<span style="color:green">CORRETO!</span> ${act} (${pct}%)`; 
+        sessionStats.correct++; 
+        updateStatsDisplay(); 
+        setTimeout(nextDrillHand, 1500); // Tempo aumentado para ler
+    } else { 
+        // Feedback Detalhado
+        let details = [];
+        if(d.fold > 0) details.push(`F:${d.fold}%`);
+        if(d.call > 0) details.push(`C:${d.call}%`);
+        if(d.raise > 0) details.push(`R:${d.raise}%`);
+        if(d.allin > 0) details.push(`A:${d.allin}%`);
+        
+        fb.innerHTML = `<span style="color:red; font-weight:800;">ERRO!</span> <span style="font-size:0.9rem; color:#555;">(${details.join(' | ')})</span>`; 
+        sessionStats.errors++; 
+        updateStatsDisplay(); 
+    } 
+}
+
 function getBestAction(d) { let max = d.fold, act = 'Fold'; if(d.call > max) { max=d.call; act='Call'; } if(d.raise > max) { max=d.raise; act='Raise'; } if(d.allin > max) { max=d.allin; act='Allin'; } return `${act} (${max}%)`; }
 function stopDrill() { document.getElementById('drill-active').style.display='none'; switchTab('drill'); }
-</script>
-</body>
-</html>
+
+// --- BACKUP SYSTEM ---
+function exportRanges() {
+    if (ranges.length === 0) { alert("Vazio!"); return; }
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(ranges));
+    const a = document.createElement('a'); a.setAttribute("href", dataStr); a.setAttribute("download", "poker_ranges_backup.json");
+    document.body.appendChild(a); a.click(); a.remove();
+}
+function importRanges(input) {
+    const file = input.files[0]; if(!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            const data = JSON.parse(e.target.result);
+            if(Array.isArray(data)) {
+                if(confirm("Substituir tudo? (Cancelar = Mesclar)")) ranges = data; 
+                else { data.forEach(r => { r.id = Date.now()+Math.random(); ranges.push(r); }); }
+                localStorage.setItem('pokerRangesV93', JSON.stringify(ranges));
+                renderRangeList(); alert("Importado!");
+            }
+        } catch(e) { alert("Erro JSON"); }
+    }; reader.readAsText(file);
+}

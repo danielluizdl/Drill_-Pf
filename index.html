@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Poker Ranges Builder - Dia 5 (v94)</title>
+    <title>Poker GTO Builder Pro (v94)</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
 </head>
@@ -11,7 +11,7 @@
 
 <div id="app-container">
     <header>
-        <h1 onclick="switchTab('landing')">Ranges Builder Pro</h1>
+        <h1 onclick="switchTab('landing')">GTO Builder Pro v94</h1>
         <nav>
             <button class="header-btn" onclick="switchTab('landing')">Início</button>
             <button class="header-btn" onclick="switchTab('home')">Ranges Salvos</button>
@@ -234,7 +234,7 @@
              <div class="table-preview-container" style="margin:0 auto; max-width:750px;">
                 <div class="poker-table-visual" id="drill-table-area" style="transform:scale(0.9);"></div>
                 <div id="drill-hero-cards" class="card-display"></div>
-                <div style="position:absolute; bottom:5px; left:50%; transform:translateX(-50%); z-index:30;">
+                <div style="position:absolute; bottom: 5px; left:50%; transform:translateX(-50%); z-index:30;">
                     <button class="btn-next-hand" onclick="nextDrillHand()">Próxima Mão ➔</button>
                 </div>
             </div>
@@ -248,7 +248,7 @@
             </div>
             <div id="drill-feedback" class="drill-feedback"></div>
             <div id="drill-range-info" style="margin-top:10px; font-size:0.85rem; color:#888;"></div>
-             <button class="header-btn" style="margin-top:20px;" onclick="stopDrill()">Encerrar Treino</button>
+             <button class="header-btn" style="margin-top:20px;" onclick="stopDrill()">Sair</button>
         </div>
     </div>
 </div>
