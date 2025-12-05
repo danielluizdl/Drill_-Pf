@@ -3,44 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Poker GTO Builder Pro (v95)</title>
+    <title>Poker GTO Builder Pro (Master v93)</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-    
-    <link rel="stylesheet" href="./css/style.css">
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
 <div id="app-container">
     <header>
-        <h1 onclick="switchTab('landing')">GTO Builder Pro v95</h1>
+        <h1 onclick="switchTab('landing')">GTO Builder Pro v93</h1>
         <nav>
             <button class="header-btn" onclick="switchTab('landing')">Início</button>
-            <button class="header-btn" onclick="switchTab('home')">Ranges</button>
-            <button class="header-btn" onclick="switchTab('format')">Novo</button>
+            <button class="header-btn" onclick="switchTab('home')">Ranges Salvos</button>
+            <button class="header-btn" onclick="switchTab('format-select')">Novo Range</button>
             <button class="header-btn" onclick="switchTab('drill')">Treinar</button>
         </nav>
     </header>
 
     <div id="tab-landing" class="screen active">
-        <h2 style="font-size:2rem; margin-bottom:10px;">Bem-vindo</h2>
-        <p style="color:var(--text-secondary);">Escolha uma opção para começar:</p>
+        <h2 style="font-size:2rem; margin-bottom:10px;">Bem-vindo ao GTO Builder</h2>
+        <p style="color:var(--text-secondary);">O que você deseja fazer hoje?</p>
         <div class="landing-grid">
-            <div class="landing-card" onclick="switchTab('format')">
+            <div class="landing-card" onclick="switchTab('format-select')">
                 <div class="landing-icon">✚</div>
                 <div class="landing-title">Criar Ranges</div>
             </div>
             <div class="landing-card" onclick="switchTab('home')">
                 <div class="landing-icon">📂</div>
-                <div class="landing-title">Meus Ranges</div>
+                <div class="landing-title">Ranges Salvos</div>
             </div>
             <div class="landing-card" onclick="switchTab('drill')">
                 <div class="landing-icon">🎯</div>
-                <div class="landing-title">Treinar (Drill)</div>
+                <div class="landing-title">Drills</div>
             </div>
         </div>
     </div>
 
-    <div id="tab-format" class="screen" style="text-align:center;">
+    <div id="tab-format-select" class="screen">
         <h2 style="font-size:1.8rem; margin-bottom:10px;">Selecione o Formato</h2>
         <div class="landing-grid">
             <div class="landing-card" onclick="setTableFormat(6)">
@@ -75,14 +74,18 @@
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
                 <button onclick="backToHomeFormat()" class="btn-reset-small">⬅ Voltar</button>
                 <h2 style="margin:0;" id="home-list-title">Meus Ranges</h2>
+                
                 <div style="display:flex; gap:10px;">
                     <button class="btn-reset-small" onclick="exportRanges()">💾 Backup</button>
                     <button class="btn-reset-small" onclick="document.getElementById('import-input').click()">📂 Restaurar</button>
                     <input type="file" id="import-input" style="display:none" accept=".json" onchange="importRanges(this)">
                 </div>
             </div>
+            
             <div class="pos-filter-container" id="home-pos-filter"></div>
-            <div id="saved-ranges-list" class="range-list"></div>
+            <div id="saved-ranges-list" class="range-list">
+                <div class="empty-state" style="grid-column: 1/-1; text-align:center; padding:40px; color:#999;">Vazio.</div>
+            </div>
         </div>
     </div>
 
@@ -97,14 +100,6 @@
                     <label>2. Nome do Range</label>
                     <input type="text" id="range-name" class="form-control" placeholder="Ex: Defesa BB vs UTG">
                 </div>
-                
-                <div class="matrix-legend">
-                    <span><span class="dot legend-fold"></span> Fold</span>
-                    <span><span class="dot legend-call"></span> Call</span>
-                    <span><span class="dot legend-raise"></span> Raise</span>
-                    <span><span class="dot legend-allin"></span> All-in</span>
-                </div>
-
                 <div id="hand-matrix"></div>
             </div>
             
@@ -112,21 +107,55 @@
                 <h3>3. Ações & Frequências</h3>
                 <div class="brush-builder">
                     <div class="action-config">
-                        <div class="action-header"><div><span class="color-dot bg-fold"></span> Fold</div><input type="text" id="pct-fold" class="pct-input" value="100" disabled>%</div>
+                        <div class="action-header">
+                            <div><span class="color-dot bg-fold"></span> Fold</div>
+                            <input type="text" id="pct-fold" class="pct-input" value="100" disabled>%
+                        </div>
                     </div>
                     <div class="action-config">
-                        <div class="action-header"><div><span class="color-dot bg-call"></span> Call</div><input type="number" id="pct-call" class="pct-input" value="0" oninput="updateBrush('call', this.value)">%</div>
+                        <div class="action-header">
+                            <div><span class="color-dot bg-call"></span> Call</div>
+                            <input type="number" id="pct-call" class="pct-input" value="0" oninput="updateBrush('call', this.value)">%
+                        </div>
                         <div class="slider-container"><input type="range" class="slider" min="0" max="100" value="0" oninput="updateBrush('call', this.value)"></div>
-                        <div class="quick-pcts"><button class="quick-btn" onclick="updateBrush('call', 0)">0%</button><button class="quick-btn" onclick="updateBrush('call', 50)">50%</button><button class="quick-btn" onclick="updateBrush('call', 100)">100%</button></div>
+                        <div class="quick-pcts">
+                            <button class="quick-btn" onclick="updateBrush('call', 0)">0%</button>
+                            <button class="quick-btn" onclick="updateBrush('call', 25)">25%</button>
+                            <button class="quick-btn" onclick="updateBrush('call', 50)">50%</button>
+                            <button class="quick-btn" onclick="updateBrush('call', 75)">75%</button>
+                            <button class="quick-btn" onclick="updateBrush('call', 100)">100%</button>
+                        </div>
                     </div>
                     <div class="action-config">
-                        <div class="action-header"><div><span class="color-dot bg-raise"></span> Raise</div><input type="number" id="pct-raise" class="pct-input" value="0" oninput="updateBrush('raise', this.value)">%</div>
+                        <div class="action-header">
+                            <div><span class="color-dot bg-raise"></span> Raise</div>
+                            <div style="display:flex; gap:5px;">
+                                <input type="text" id="val-raise" class="bb-input" placeholder="BB">
+                                <input type="number" id="pct-raise" class="pct-input" value="0" oninput="updateBrush('raise', this.value)">%
+                            </div>
+                        </div>
                         <div class="slider-container"><input type="range" class="slider" min="0" max="100" value="0" oninput="updateBrush('raise', this.value)"></div>
-                        <div class="quick-pcts"><button class="quick-btn" onclick="updateBrush('raise', 0)">0%</button><button class="quick-btn" onclick="updateBrush('raise', 50)">50%</button><button class="quick-btn" onclick="updateBrush('raise', 100)">100%</button></div>
+                         <div class="quick-pcts">
+                            <button class="quick-btn" onclick="updateBrush('raise', 0)">0%</button>
+                            <button class="quick-btn" onclick="updateBrush('raise', 25)">25%</button>
+                            <button class="quick-btn" onclick="updateBrush('raise', 50)">50%</button>
+                            <button class="quick-btn" onclick="updateBrush('raise', 75)">75%</button>
+                            <button class="quick-btn" onclick="updateBrush('raise', 100)">100%</button>
+                        </div>
                     </div>
                     <div class="action-config">
-                        <div class="action-header"><div><span class="color-dot bg-allin"></span> All-In</div><input type="number" id="pct-allin" class="pct-input" value="0" oninput="updateBrush('allin', this.value)">%</div>
+                        <div class="action-header">
+                            <div><span class="color-dot bg-allin"></span> All-In</div>
+                            <input type="number" id="pct-allin" class="pct-input" value="0" oninput="updateBrush('allin', this.value)">%
+                        </div>
                         <div class="slider-container"><input type="range" class="slider" min="0" max="100" value="0" oninput="updateBrush('allin', this.value)"></div>
+                        <div class="quick-pcts">
+                            <button class="quick-btn" onclick="updateBrush('allin', 0)">0%</button>
+                            <button class="quick-btn" onclick="updateBrush('allin', 25)">25%</button>
+                            <button class="quick-btn" onclick="updateBrush('allin', 50)">50%</button>
+                            <button class="quick-btn" onclick="updateBrush('allin', 75)">75%</button>
+                            <button class="quick-btn" onclick="updateBrush('allin', 100)">100%</button>
+                        </div>
                     </div>
                 </div>
                 <button class="btn-reset-range" onclick="resetRangeGrid()">🗑 Limpar Grid</button>
@@ -141,7 +170,12 @@
                 <h3>4. Ação na Mesa</h3>
                 <p style="font-size:0.8rem; color:#666; margin:0;">Selecione o HERO na bolinha.</p>
                 <button onclick="initTableConfigList()" class="btn-reset-small">↺ Resetar</button>
-                <div class="ante-input-group"><label>Ante (bb):</label><input type="number" id="ante-input" class="ante-input" step="0.1" onchange="updateTableVisual()"></div>
+                
+                <div class="ante-input-group">
+                    <label>Ante por jogador (bb):</label>
+                    <input type="number" id="ante-input" class="ante-input" value="0" step="0.1" onchange="updateTableVisual()">
+                </div>
+
                 <div class="config-list" id="pos-config-list"></div>
             </div>
             <div>
@@ -171,8 +205,14 @@
         <div id="drill-format-selection" class="format-selection-screen">
             <h2 style="font-size:1.8rem; margin-bottom:10px;">Treinar Formato</h2>
             <div class="landing-grid">
-                <div class="landing-card" onclick="viewDrillFormat(6)"><div class="landing-icon">👤6</div><div class="landing-title">6-Max</div></div>
-                <div class="landing-card" onclick="viewDrillFormat(8)"><div class="landing-icon">👤8</div><div class="landing-title">8-Max</div></div>
+                <div class="landing-card" onclick="viewDrillFormat(6)">
+                    <div class="landing-icon">👤6</div>
+                    <div class="landing-title">6-Max</div>
+                </div>
+                <div class="landing-card" onclick="viewDrillFormat(8)">
+                    <div class="landing-icon">👤8</div>
+                    <div class="landing-title">8-Max</div>
+                </div>
             </div>
         </div>
 
@@ -239,9 +279,6 @@
     </div>
 </div>
 
-<div id="matrix-tooltip" class="tooltip"></div>
-
-<script src="./js/script.js"></script>
-
+<script src="js/script.js"></script>
 </body>
 </html>
