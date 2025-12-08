@@ -67,9 +67,8 @@ let sessionStats = { hands: 0, correct: 0, errors: 0, consults: 0 };
 let isDrillDrawing = false;
 let drillDrawAction = 'exclude';
 
-initHandMatrix();
-// Inicialização da Home para carregar ranges se existirem, mas UI correta é setada pelo SwitchTab
-initUI();
+
+// --- FUNÇÕES DE LÓGICA E UI ---
 
 function setTableFormat(size) {
     currentTableSize = size;
@@ -97,7 +96,9 @@ function setTableFormat(size) {
 function switchTab(tab) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.querySelectorAll('.header-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById('tab-'+tab).classList.add('active');
+    const target = document.getElementById('tab-'+tab);
+    if(target) target.classList.add('active');
+    
     const headerBtns = document.querySelectorAll('header nav .header-btn');
     headerBtns.forEach(btn => btn.classList.remove('active'));
     
@@ -160,28 +161,33 @@ function backToDrillFormat() {
 // ... [Funções do Editor Range] ...
 function initUI() {
     const filterDiv = document.getElementById('home-pos-filter'); 
-    filterDiv.innerHTML = `<button class="pos-btn active" onclick="filterHome('ALL', this)">Todos</button>`;
+    if(filterDiv) {
+        filterDiv.innerHTML = `<button class="pos-btn active" onclick="filterHome('ALL', this)">Todos</button>`;
+        // Filtro da home gerado separadamente para suportar tudo
+        const allPosLabels = new Set([...POS_8MAX.map(p=>p.label), ...POS_6MAX.map(p=>p.label)]);
+        allPosLabels.forEach(lbl => {
+                filterDiv.innerHTML += `<button class="pos-btn" onclick="filterHome('${lbl}', this)">${lbl}</button>`;
+        });
+    }
     
     const editorSel = document.getElementById('editor-pos-select'); 
-    editorSel.innerHTML = '';
-    
-    // Usa activePositions para gerar os botões do Editor
-    activePositions.forEach(p => {
-        const b = document.createElement('button'); b.className = 'pos-btn'; b.innerText = p.label; b.dataset.pos = p.label;
-        b.onclick = () => { if(selectedEditorPositions.has(p.label)) { selectedEditorPositions.delete(p.label); b.classList.remove('selected'); } else { selectedEditorPositions.add(p.label); b.classList.add('selected'); } };
-        if(selectedEditorPositions.has(p.label)) b.classList.add('selected');
-        editorSel.appendChild(b);
-    });
-    
-    // Filtro da home gerado separadamente para suportar tudo
-    const allPosLabels = new Set([...POS_8MAX.map(p=>p.label), ...POS_6MAX.map(p=>p.label)]);
-    allPosLabels.forEach(lbl => {
-            filterDiv.innerHTML += `<button class="pos-btn" onclick="filterHome('${lbl}', this)">${lbl}</button>`;
-    });
+    if(editorSel) {
+        editorSel.innerHTML = '';
+        // Usa activePositions para gerar os botões do Editor
+        activePositions.forEach(p => {
+            const b = document.createElement('button'); b.className = 'pos-btn'; b.innerText = p.label; b.dataset.pos = p.label;
+            b.onclick = () => { if(selectedEditorPositions.has(p.label)) { selectedEditorPositions.delete(p.label); b.classList.remove('selected'); } else { selectedEditorPositions.add(p.label); b.classList.add('selected'); } };
+            if(selectedEditorPositions.has(p.label)) b.classList.add('selected');
+            editorSel.appendChild(b);
+        });
+    }
 }
 
 function initHandMatrix() {
-    const m = document.getElementById('hand-matrix'); m.innerHTML = '';
+    const m = document.getElementById('hand-matrix'); 
+    if(!m) return;
+    
+    m.innerHTML = '';
     rangeData.grid = {};
     for(let i=0; i<13; i++){ for(let j=0; j<13; j++){
             let h = i===j ? RANKS[i]+RANKS[j] : (i<j ? RANKS[i]+RANKS[j]+'s' : RANKS[j]+RANKS[i]+'o');
@@ -264,7 +270,10 @@ function editRange(id) {
 
 // --- EDITOR MESA & ROTAÇÃO ---
 function initTableConfigList() {
-    const list = document.getElementById('pos-config-list'); list.innerHTML = ''; currentScenario = {};
+    const list = document.getElementById('pos-config-list'); 
+    if(!list) return;
+
+    list.innerHTML = ''; currentScenario = {};
     document.getElementById('ante-input').value = currentAnte;
     
     activePositions.forEach(pos => {
@@ -326,6 +335,8 @@ function updateBet(pid, val) { currentScenario[pid].bet = parseFloat(val) || 0; 
 
 function updateTableVisual(targetId = 'visual-table') {
     const container = document.getElementById(targetId);
+    if(!container) return;
+
     container.querySelectorAll('.seat-visual, .chip-container, .dealer-btn, .table-center-pot, .stack-display, .player-cards-container').forEach(e => e.remove());
     
     let anteVal = parseFloat(document.getElementById('ante-input') ? document.getElementById('ante-input').value : currentAnte) || 0;
@@ -534,3 +545,18 @@ function importRanges(input) {
         } catch(e) { alert("Erro JSON"); }
     }; reader.readAsText(file);
 }
+
+// --- INICIALIZAÇÃO SEGURA (DOM READY) ---
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("Sistema Iniciado - Poker Range Builder v93");
+    
+    // Inicializa a matriz e a interface somente quando o DOM estiver pronto
+    initHandMatrix();
+    initUI();
+
+    // Verificação extra para renderizar a aba correta se necessário
+    const currentTab = document.querySelector('.screen.active');
+    if(currentTab && currentTab.id === 'tab-editor') {
+        // Lógica de re-render se necessário
+    }
+});
